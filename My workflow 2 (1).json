@@ -1,0 +1,393 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -448,
+        80
+      ],
+      "id": "98a6af87-3c1e-457b-973d-e0406fbbca60",
+      "name": "Telegram Trigger",
+      "webhookId": "2b287a2c-6315-4b4c-83f9-1881b3dc1cb9",
+      "credentials": {
+        "telegramApi": {
+          "id": "ZXRO5XHuGGc30yU1",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "184d0d51-da8f-40bd-bb8e-f6f388bb9d02",
+              "leftValue": "={{$json.message.voice.file_id}}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "a41a343a-4b02-472f-a53b-a53875cb983b",
+              "leftValue": "={{$json.message.text}}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -224,
+        80
+      ],
+      "id": "84935b7e-ab39-4319-a682-e03ca95c8cb5",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "hi",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        48,
+        -144
+      ],
+      "id": "7af5fa78-ea07-4ed6-abc2-66cf5670941a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        48,
+        32
+      ],
+      "id": "bc977d2f-0770-48a6-bd2c-d89e6fa50985",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "xWSUwTX35hN3sOlQ",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.message.chat.id }}\n",
+        "text": "={{$json.output}}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        672,
+        -112
+      ],
+      "id": "544c057b-7f67-4ae6-a5f8-6a8ba02b9d2c",
+      "name": "Send a text message",
+      "webhookId": "833f2581-98c6-49e2-86a7-a3afd3dfc8f0",
+      "credentials": {
+        "telegramApi": {
+          "id": "ZXRO5XHuGGc30yU1",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "translate",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        32,
+        992
+      ],
+      "id": "e8026ea3-f272-4a14-b44b-d1e562e1bcb3",
+      "name": "Translate a recording",
+      "credentials": {
+        "openAiApi": {
+          "id": "xWSUwTX35hN3sOlQ",
+          "name": "n8n free OpenAI API credits"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "chatId": "={{$node[\"Telegram Trigger\"].json.message.chat.id}}\n\n",
+        "text": "={{$json.output}}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1104,
+        192
+      ],
+      "id": "1f549464-a006-41d8-aa42-7681306e334b",
+      "name": "Send a text message1",
+      "webhookId": "43fcb9fb-f589-4a38-8fb4-ca89f549d810",
+      "credentials": {
+        "telegramApi": {
+          "id": "ZXRO5XHuGGc30yU1",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}\n",
+        "options": {
+          "systemMessage": "If the user already provided a preference (like Veg/Non-Veg), DO NOT ask onboarding again.\nIf the user asks \"menu\", \"famous\", or any food question, answer directly using stored memory.\n🧩 2. Add Restaurant Knowledge (so AI knows menu)\n\nRight now AI doesn't know your menu — so it falls back to greeting.\n\nInside the SAME system prompt, paste this below behaviour rules:\n\nRestaurant Name: Vijayawada Spice Hub\nLocation: MG Road, Vijayawada\nOpening Time: 9 AM – 11 PM\n\nNON-VEG MENU:\nChicken Biryani\nMutton Biryani\nButter Chicken\nChicken 65\nFish Fry\nPrawns Curry\n\nVEG MENU:\nPaneer Butter Masala\nVeg Biryani\nDal Tadka\nMushroom Curry\n\nTIFFINS:\nIdli\nDosa\nUpma\nPoori\n\nSNACKS:\nSamosa\nMirchi Bajji\nPakoda\n\nFamous Non-Veg Dish: Chicken Biryani\nFamous Veg Dish: Paneer Butter Masala\n🧠 WHY YOUR BOT WAS LOOPING\n\nBefore fix:\n\nUser: menu\nAI → doesn't know menu\nAI → fallback greeting\n\nAfter fix:\n\nUser: I like non veg\n(memory saved)\n\nUser: menu\nAI → reads memory → shows non veg menu 🍗\n🎯 EXPECTED RESULT AFTER FIX\n\nUser:\n\ni like non veg\n\nBot:\n\n🍗 Great! I’ll suggest non-veg items for you.\n\nUser:\n\nmenu\n\nBot:\n\n🍗 Non-Veg Menu:\n• Chicken Biryani\n• Butter Chicken\n• Fish Fry\nWant spicy or mild?"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        608,
+        208
+      ],
+      "id": "0233b22d-40c6-4d67-af41-191eccc13cbb",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        592,
+        416
+      ],
+      "id": "12edf6fb-6e28-4250-8af0-7dc9f400cd71",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "xWSUwTX35hN3sOlQ",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{$json.message.voice.file_id}}\n\n",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -96,
+        976
+      ],
+      "id": "dccacb35-586a-465b-8c01-cd2dfbabbb0c",
+      "name": "Get a file",
+      "webhookId": "a767de7e-9de5-4288-bae9-46ad46999c16",
+      "credentials": {
+        "telegramApi": {
+          "id": "ZXRO5XHuGGc30yU1",
+          "name": "Telegram account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message.chat.id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        720,
+        512
+      ],
+      "id": "2ea8ad70-6289-46e8-9e36-3517943bad9e",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Translate a recording": {
+      "main": [
+        []
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        []
+      ]
+    },
+    "Send a text message1": {
+      "main": [
+        []
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Translate a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1,
+    "timeSavedPerExecution": 0
+  },
+  "versionId": "e38a7cb6-1813-49bd-9a44-f057c1f13049",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "26f28ee5c3670eb76f91378468d894077b4d1fbb7f9b628d3f3dece99bf919d3"
+  },
+  "id": "_MKwiNieH_Uq-ObIF2ePy",
+  "tags": []
+}
